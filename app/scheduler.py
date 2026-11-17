@@ -103,6 +103,12 @@ def check_watchdogs() -> None:
                     logger.exception("Failed to send alert for watchdog %s", wd.id)
 
 
+def check_bills() -> None:
+    from app.bills.checker import run_checks
+
+    run_checks()
+
+
 def _run_scheduler_as_leader(lock_path: str) -> None:
     """Block until this process holds the scheduler lock, then start the scheduler.
 
@@ -125,6 +131,8 @@ def _run_scheduler_as_leader(lock_path: str) -> None:
         fcntl.flock(handle, fcntl.LOCK_EX)
     scheduler.add_job(check_reminders, "interval", seconds=60, id="check_reminders")
     scheduler.add_job(check_watchdogs, "interval", seconds=30, id="check_watchdogs")
+    # Hourly: each user's 8 am is a different moment in UTC, and a restart must not skip a day.
+    scheduler.add_job(check_bills, "cron", minute=7, id="check_bills", max_instances=1, coalesce=True)
     scheduler.start()
     logger.info("Scheduler started")
 

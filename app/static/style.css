@@ -2723,3 +2723,100 @@ body.ai-chat-open .tabbar {
   color: var(--text-secondary);
   letter-spacing: 0.02em;
 }
+
+/* ==========================================================================
+   Bills
+   ========================================================================== */
+
+.watchdog-status-badge.warn {
+  background: var(--warning-light, rgba(245, 158, 11, 0.12));
+  color: var(--warning, #f59e0b);
+  border-color: var(--warning-border, rgba(245, 158, 11, 0.25));
+}
+
+.bills-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.bills-toolbar .theme-seg { flex: 1 1 260px; max-width: 380px; }
+
+.bill-card { gap: 10px; }
+.bill-cat-icon { display: inline-flex; width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; }
+.bill-cat-icon svg { width: 100%; height: 100%; }
+.bill-amount-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.bill-amount { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+.bill-amount-sub { font-size: 12.5px; color: var(--text-muted); }
+.bill-chip-error { color: var(--danger); border-color: var(--danger-border); }
+
+.provider-group { margin-bottom: 8px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-input); }
+.provider-group-title {
+  display: flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; user-select: none;
+  font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-secondary); padding: 12px 14px;
+}
+.provider-group-title::-webkit-details-marker { display: none; }
+.provider-group-icon { display: inline-flex; width: 15px; height: 15px; color: var(--accent); }
+.provider-group-icon svg { width: 100%; height: 100%; }
+.provider-group-count { font-size: 11px; font-weight: 600; color: var(--text-muted); background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-full); padding: 1px 7px; }
+.provider-chevron { width: 16px; height: 16px; margin-left: auto; transition: transform 0.2s ease; }
+.provider-group[open] .provider-chevron { transform: rotate(180deg); }
+.provider-group .provider-grid { padding: 0 12px 12px; }
+.provider-group-title:focus-visible { outline: 2px solid var(--border-focus); outline-offset: -2px; border-radius: var(--radius); }
+.provider-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.provider-btn {
+  appearance: none; text-align: left; cursor: pointer;
+  background: var(--surface-input); color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 14px; font-size: 14px; font-weight: 500;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.provider-btn:hover { border-color: var(--border-focus); background: var(--accent-light); }
+
+.captcha-box {
+  display: flex; justify-content: center; padding: 14px; margin-bottom: 12px;
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+}
+.captcha-box img { max-width: 100%; height: auto; image-rendering: auto; }
+
+.form-error {
+  color: var(--danger); background: var(--danger-light); border: 1px solid var(--danger-border);
+  border-radius: var(--radius-sm, 8px); padding: 10px 12px; font-size: 13.5px; margin-bottom: 8px;
+}
+
+.bill-hero { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.bill-hero-amount { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; color: var(--text); }
+
+.bill-explain { margin-bottom: 8px; }
+.bill-explain p { margin: 0 0 8px; line-height: 1.55; font-size: 14.5px; color: var(--text); }
+.bill-explain-ur { font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Noto Naskh Arabic", "Segoe UI", system-ui, sans-serif; line-height: 2.1; }
+.bill-explain-ur p { line-height: 2.1; font-size: 16px; }
+
+.bill-section-title {
+  font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-muted); margin: 16px 0 8px;
+}
+.bill-table {
+  background: var(--surface-input); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 4px 14px;
+}
+.bill-row {
+  display: flex; justify-content: space-between; gap: 12px; padding: 9px 0;
+  font-size: 14px; color: var(--text-secondary); border-bottom: 1px solid var(--border-subtle);
+}
+.bill-row:last-child { border-bottom: 0; }
+.bill-row span:last-child { color: var(--text); font-variant-numeric: tabular-nums; text-align: right; }
+.bill-row-total { font-weight: 700; color: var(--text); }
+
+.seg-mini { display: flex; gap: 4px; padding: 4px; margin-bottom: 10px; width: fit-content;
+  background: var(--surface-input); border: 1px solid var(--border); border-radius: var(--radius-full); }
+.bill-chart svg { width: 100%; height: auto; display: block; }
+.chart-bar { fill: var(--accent); opacity: 0.85; }
+.chart-val { font-size: 9px; fill: var(--text-secondary); }
+.chart-lbl { font-size: 9.5px; fill: var(--text-muted); }
+
+.bill-actions { flex-wrap: wrap; margin-top: 16px; }
+.bill-actions button { flex: 1 1 auto; }

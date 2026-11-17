@@ -149,6 +149,52 @@
 </div>
 
 <!-- 4. Settings View -->
+<!-- 4. Bills View -->
+<div id="view-bills" class="spa-view hidden-view">
+  <section class="section-head">
+    <div class="section-title-wrap">
+      <h2>Bills</h2>
+      <span class="count-pill" id="bills-count"></span>
+    </div>
+    <div class="section-actions">
+      <button id="add-bill-btn" class="btn-primary btn-sm" onclick="openAddBillModal()">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span>Add bill</span>
+      </button>
+    </div>
+  </section>
+
+  <div class="bills-toolbar">
+    <div class="theme-seg" role="radiogroup" aria-label="Bill language">
+      <button type="button" class="theme-seg-btn" role="radio" aria-checked="false" data-bills-lang="en" onclick="setBillsLanguage('en')">English</button>
+      <button type="button" class="theme-seg-btn" role="radio" aria-checked="false" data-bills-lang="ur_roman" onclick="setBillsLanguage('ur_roman')">Roman Urdu</button>
+      <button type="button" class="theme-seg-btn" role="radio" aria-checked="false" data-bills-lang="ur" onclick="setBillsLanguage('ur')">اردو</button>
+    </div>
+  </div>
+
+  <section id="bills-list" class="list"></section>
+
+  <div id="bills-empty" class="empty-state hidden">
+    <div class="empty-icon-wrap">
+      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 2v20l3-2 3 2 3-2 3 2 3-2V2l-3 2-3-2-3 2-3-2-3 2z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/>
+      </svg>
+    </div>
+    <h3 class="empty-title">No bills yet</h3>
+    <p class="empty-desc">Add your electricity, gas, water or phone bill. Notifaybers checks it for you, explains it in plain language and reminds you before it is due.</p>
+    <button class="btn-ghost btn-sm" onclick="openAddBillModal()">
+      <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      <span>Add your first bill</span>
+    </button>
+  </div>
+</div>
+
 <div id="view-settings" class="spa-view hidden-view">
   <section class="section-head">
     <div class="section-title-wrap">
@@ -185,6 +231,27 @@
       <div class="card-header-icon">
         <div class="icon-avatar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div class="card-header-text">
+          <span class="card-label">Reminders</span>
+          <span class="card-hint">Scheduled alerts: once, daily, weekly, monthly or cron. Switching it off only hides the tab; existing reminders keep firing.</span>
+        </div>
+      </div>
+      <div class="switch-control{% if reminders_enabled %} active{% endif %}" id="reminders-feature-switch" role="switch" tabindex="0"
+           aria-checked="{{ 'true' if reminders_enabled else 'false' }}" aria-label="Enable Reminders"
+           onclick="toggleRemindersFeature(this)">
+        <div class="switch-track">
+          <div class="switch-thumb"></div>
+        </div>
+      </div>
+    </div>
+    <div class="feature-row">
+      <div class="card-header-icon">
+        <div class="icon-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
           </svg>
         </div>
@@ -196,6 +263,27 @@
       <div class="switch-control{% if watchdogs_enabled %} active{% endif %}" id="watchdogs-feature-switch" role="switch" tabindex="0"
            aria-checked="{{ 'true' if watchdogs_enabled else 'false' }}" aria-label="Enable Watchdogs"
            onclick="toggleWatchdogsFeature(this)">
+        <div class="switch-track">
+          <div class="switch-thumb"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="card-header-icon">
+        <div class="icon-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 2v20l3-2 3 2 3-2 3 2 3-2V2l-3 2-3-2-3 2-3-2-3 2z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/>
+          </svg>
+        </div>
+        <div class="card-header-text">
+          <span class="card-label">Bills</span>
+          <span class="card-hint">Check utility bills (electricity, gas, water, phone), get a plain-language breakdown and due-date reminders. Adds a Bills tab to the navigation.</span>
+        </div>
+      </div>
+      <div class="switch-control{% if bills_enabled %} active{% endif %}" id="bills-feature-switch" role="switch" tabindex="0"
+           aria-checked="{{ 'true' if bills_enabled else 'false' }}" aria-label="Enable Bills"
+           onclick="toggleBillsFeature(this)">
         <div class="switch-track">
           <div class="switch-thumb"></div>
         </div>

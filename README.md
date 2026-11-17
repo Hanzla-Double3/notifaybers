@@ -159,6 +159,23 @@ appears in the navigation. Each watchdog gets a ping URL
 push if it goes quiet for longer than interval + grace. Existing
 watchdogs keep being monitored even if the feature is switched off again.
 
+## Bills
+
+Off by default. Turn it on in Settings → Features and a Bills tab appears. Pick your
+company (electricity, gas, water, phone), enter the number printed on your bill, and
+Notifaybers fetches the bill, shows the amount, due date, a 12-month history and a
+plain-language breakdown in English, Roman Urdu or Urdu, and can share the bill as an
+image.
+
+Each day at 8 am (your timezone) it checks only when a new bill is expected, using
+that company's usual publish day, and sends a push when one arrives. The day before
+the due date it sends a reminder (and says if the portal shows the bill unpaid).
+
+Companies are plugins: one file per company in `app/bills/adapters/`. Anyone can add
+one; see [docs/ADAPTERS.md](docs/ADAPTERS.md) and [CONTRIBUTING.md](CONTRIBUTING.md). If a company's portal asks for a CAPTCHA,
+the app shows it to you and you type it; it never solves one for you. Bill data is
+fetched from the company's own public portal and is only as reliable as that portal.
+
 ## Theme
 
 Settings → Appearance: System (default), Light or Dark. Stored per

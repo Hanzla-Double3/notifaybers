@@ -372,6 +372,7 @@ const SPA_ROUTES = {
   "/": "dashboard",
   "/reminders": "reminders",
   "/watchdogs": "watchdogs",
+  "/bills": "bills",
   "/settings": "settings",
 };
 
@@ -379,7 +380,8 @@ const ROUTE_INDICES = {
   "/": 0,
   "/reminders": 1,
   "/watchdogs": 2,
-  "/settings": 3,
+  "/bills": 3,
+  "/settings": 4,
 };
 
 let currentRouteIndex = ROUTE_INDICES[normalizePath(window.location.pathname)] ?? 0;
@@ -441,6 +443,15 @@ function navigateTo(path, push = true) {
     cleanPath = "/settings";
     if (!push) history.replaceState({ path: cleanPath }, "", cleanPath);
   }
+  if (cleanPath === "/reminders" && !remindersEnabled()) {
+    cleanPath = "/settings";
+    if (!push) history.replaceState({ path: cleanPath }, "", cleanPath);
+  }
+  if (cleanPath === "/bills" && !billsEnabled()) {
+    // Bills is an opt-in feature too.
+    cleanPath = "/settings";
+    if (!push) history.replaceState({ path: cleanPath }, "", cleanPath);
+  }
   const viewName = SPA_ROUTES[cleanPath] || "dashboard";
   const newIndex = ROUTE_INDICES[cleanPath] ?? 0;
   const isMovingRight = newIndex > currentRouteIndex;
@@ -458,6 +469,7 @@ function navigateTo(path, push = true) {
     dashboard: "Notifaybers — Inbox",
     reminders: "Notifaybers — Reminders",
     watchdogs: "Notifaybers — Watchdogs",
+    bills: "Notifaybers — Bills",
     settings: "Notifaybers — Settings",
   };
   document.title = titles[viewName] || "Notifaybers";
@@ -505,6 +517,8 @@ function navigateTo(path, push = true) {
     loadReminders();
   } else if (viewName === "watchdogs") {
     loadWatchdogs();
+  } else if (viewName === "bills") {
+    loadBills();
   } else if (viewName === "settings") {
     loadSettings();
   }
@@ -512,7 +526,7 @@ function navigateTo(path, push = true) {
 
 // Intercept clicks on links for SPA navigation
 document.addEventListener("click", (e) => {
-  const link = e.target.closest("a[data-path], a[href='/'], a[href='/reminders'], a[href='/watchdogs'], a[href='/settings'], .brand-link");
+  const link = e.target.closest("a[data-path], a[href='/'], a[href='/reminders'], a[href='/watchdogs'], a[href='/bills'], a[href='/settings'], .brand-link");
   if (!link) return;
 
   let href = link.getAttribute("href") || link.dataset.path;
@@ -895,6 +909,15 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.key === " " || e.key === "Enter") {
         e.preventDefault();
         toggleWatchdogsFeature(featureSwitch);
+      }
+    });
+  }
+  const remindersSwitch = document.getElementById("reminders-feature-switch");
+  if (remindersSwitch) {
+    remindersSwitch.addEventListener("keydown", (e) => {
+      if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        toggleRemindersFeature(remindersSwitch);
       }
     });
   }
@@ -1582,10 +1605,47 @@ function applyWatchdogsFlag(enabled) {
   requestAnimationFrame(() => updateNavIndicators(normalizePath(window.location.pathname)));
 }
 
+function remindersEnabled() {
+  return document.body.dataset.reminders !== "0";
+}
+
+function applyRemindersFlag(enabled) {
+  document.body.dataset.reminders = enabled ? "1" : "0";
+  document.querySelectorAll("[data-requires='reminders']").forEach((el) => {
+    el.classList.toggle("hidden", !enabled);
+  });
+  const sw = document.getElementById("reminders-feature-switch");
+  if (sw) {
+    sw.classList.toggle("active", enabled);
+    sw.setAttribute("aria-checked", enabled ? "true" : "false");
+  }
+  requestAnimationFrame(() => updateNavIndicators(normalizePath(window.location.pathname)));
+}
+
+async function toggleRemindersFeature(switchEl) {
+  if (switchEl.dataset.busy) return;
+  switchEl.dataset.busy = "1";
+  const next = !remindersEnabled();
+  applyRemindersFlag(next);
+  try {
+    const res = await api("/api/me/reminders", { method: "PUT", body: JSON.stringify({ enabled: next }) });
+    applyRemindersFlag(!!res.reminders_enabled);
+    toast(res.reminders_enabled ? "Reminders enabled" : "Reminders hidden");
+  } catch (err) {
+    applyRemindersFlag(!next);
+    toast(err.message);
+  } finally {
+    delete switchEl.dataset.busy;
+  }
+}
+
 async function loadFeatureFlags() {
   try {
     const me = await api("/api/me");
     applyWatchdogsFlag(!!me.watchdogs_enabled);
+    applyRemindersFlag(me.reminders_enabled !== false);
+    applyBillsFlag(!!me.bills_enabled);
+    if (me.bills_language) applyBillsLanguage(me.bills_language);
   } catch (e) { }
 }
 

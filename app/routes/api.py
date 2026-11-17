@@ -30,6 +30,9 @@ def get_me(request: Request, user: User = Depends(require_user_api)):
         "username": user.username,
         "timezone": user.timezone,
         "watchdogs_enabled": user.watchdogs_enabled,
+        "reminders_enabled": user.reminders_enabled,
+        "bills_enabled": user.bills_enabled,
+        "bills_language": user.bills_language,
         "watchdog_min_ping_seconds": settings.watchdog_min_ping_seconds,
         "has_openai_key": bool(user.openai_api_key and user.openai_api_key.strip()),
         "openai_base_url": user.openai_base_url or "https://api.openai.com/v1",
@@ -135,6 +138,23 @@ def update_watchdog_feature(
     session.add(user)
     session.commit()
     return {"watchdogs_enabled": user.watchdogs_enabled}
+
+
+class ReminderFeatureUpdate(BaseModel):
+    enabled: bool
+
+
+@router.put("/me/reminders")
+def update_reminder_feature(
+    body: ReminderFeatureUpdate,
+    user: User = Depends(require_user_api),
+    session: Session = Depends(get_session),
+):
+    # Only hides the tab: existing reminders keep firing, like watchdogs do when switched off.
+    user.reminders_enabled = body.enabled
+    session.add(user)
+    session.commit()
+    return {"reminders_enabled": user.reminders_enabled}
 
 
 # ---------- push subscriptions ----------

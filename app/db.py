@@ -28,6 +28,16 @@ def _migrate() -> None:
                 "UPDATE user SET watchdogs_enabled = 1 WHERE id IN (SELECT DISTINCT user_id FROM watchdog)"
             )
             conn.commit()
+        if "reminders_enabled" not in user_cols:
+            # On for everyone who already has the app: switching a feature off is opt-in.
+            conn.exec_driver_sql("ALTER TABLE user ADD COLUMN reminders_enabled BOOLEAN NOT NULL DEFAULT 1")
+            conn.commit()
+        if "bills_enabled" not in user_cols:
+            conn.exec_driver_sql("ALTER TABLE user ADD COLUMN bills_enabled BOOLEAN NOT NULL DEFAULT 0")
+            conn.commit()
+        if "bills_language" not in user_cols:
+            conn.exec_driver_sql("ALTER TABLE user ADD COLUMN bills_language TEXT NOT NULL DEFAULT 'ur_roman'")
+            conn.commit()
         for col in ("email", "google_sub", "name"):
             if col not in user_cols:
                 conn.exec_driver_sql(f"ALTER TABLE user ADD COLUMN {col} TEXT")
@@ -49,7 +59,7 @@ def _migrate() -> None:
 
 
 def init_db() -> None:
-    SQLModel.metadata.create_all(engine)
+    SQLModel.metadata.create_all(engine)  # also creates the bill tables
     _migrate()
     with Session(engine) as session:
         existing = session.exec(

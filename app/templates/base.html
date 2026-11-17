@@ -19,7 +19,7 @@
 <meta name="apple-mobile-web-app-title" content="Notifaybers">
 <link rel="stylesheet" href="/static/style.css?v={{ asset_v('style.css') }}">
 </head>
-<body data-page="{% block page_id %}{% endblock %}" data-watchdogs="{{ '1' if watchdogs_enabled else '0' }}" data-base-url="{{ base_url }}">
+<body data-page="{% block page_id %}{% endblock %}" data-reminders="{{ '1' if reminders_enabled else '0' }}" data-watchdogs="{{ '1' if watchdogs_enabled else '0' }}" data-bills="{{ '1' if bills_enabled else '0' }}" data-bills-lang="{{ bills_language }}" data-base-url="{{ base_url }}">
 
 <header class="topbar">
   <div class="topbar-inner">
@@ -46,7 +46,7 @@
         </svg>
         <span>Inbox</span>
       </a>
-      <a href="/reminders" class="nav-item" data-path="/reminders">
+      <a href="/reminders" class="nav-item{% if not reminders_enabled %} hidden{% endif %}" data-path="/reminders" data-requires="reminders">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/>
           <polyline points="12 6 12 12 16 14"/>
@@ -58,6 +58,12 @@
           <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
         </svg>
         <span>Watchdogs</span>
+      </a>
+      <a href="/bills" class="nav-item{% if not bills_enabled %} hidden{% endif %}" data-path="/bills" data-requires="bills">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 2v20l3-2 3 2 3-2 3 2 3-2V2l-3 2-3-2-3 2-3-2-3 2z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/>
+        </svg>
+        <span>Bills</span>
       </a>
       <a href="/settings" class="nav-item" data-path="/settings">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -118,7 +124,7 @@
       </div>
       <span>Inbox</span>
     </a>
-    <a href="/reminders" class="tab" data-path="/reminders">
+    <a href="/reminders" class="tab{% if not reminders_enabled %} hidden{% endif %}" data-path="/reminders" data-requires="reminders">
       <div class="tab-icon-wrap">
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/>
@@ -134,6 +140,14 @@
         </svg>
       </div>
       <span>Watchdogs</span>
+    </a>
+    <a href="/bills" class="tab{% if not bills_enabled %} hidden{% endif %}" data-path="/bills" data-requires="bills">
+      <div class="tab-icon-wrap">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 2v20l3-2 3 2 3-2 3 2 3-2V2l-3 2-3-2-3 2-3-2-3 2z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/>
+        </svg>
+      </div>
+      <span>Bills</span>
     </a>
     <a href="/settings" class="tab" data-path="/settings">
       <div class="tab-icon-wrap">
@@ -222,6 +236,7 @@
 <script src="/static/vendor/marked.min.js" defer></script>
 <script src="/static/vendor/purify.min.js" defer></script>
 <script src="/static/app.js?v={{ asset_v('app.js') }}" defer></script>
+<script src="/static/bills.js?v={{ asset_v('bills.js') }}" defer></script>
 <script>
   document.querySelectorAll('.tab, .nav-item').forEach(function (el) {
     if (el.dataset.path === window.location.pathname) {

@@ -5,7 +5,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import settings
 from app.db import init_db
-from app.routes import api, auth, pages, webhook
+from app.routes import api, auth, bills, pages, webhook
 from app.scheduler import start_scheduler
 
 app = FastAPI(title="Notifaybers")
@@ -58,6 +58,7 @@ def manifest():
 app.include_router(auth.router)
 app.include_router(pages.router)
 app.include_router(api.router)
+app.include_router(bills.router)
 app.include_router(webhook.router)
 
 

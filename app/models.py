@@ -13,6 +13,9 @@ class User(SQLModel, table=True):
     name: Optional[str] = None
     timezone: str = Field(default="UTC")
     watchdogs_enabled: bool = Field(default=False)
+    reminders_enabled: bool = Field(default=True)
+    bills_enabled: bool = Field(default=False)
+    bills_language: str = Field(default="ur_roman")  # en | ur_roman | ur: language of bill text and pushes
     openai_api_key: Optional[str] = None
     openai_base_url: Optional[str] = "https://api.openai.com/v1"
     openai_model: Optional[str] = "gpt-4o-mini"
@@ -86,3 +89,37 @@ class NotificationLog(SQLModel, table=True):
     body: Optional[str] = None
     status: str
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
+
+
+class BillAccount(SQLModel, table=True):
+    """One consumer number at one company, e.g. "Home" at GEPCO."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    adapter_id: str  # which adapter fetches it, e.g. "gepco"
+    consumer_number: str
+    nickname: str = ""
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_checked_at: Optional[datetime] = None  # last attempt, successful or not
+    last_success_at: Optional[datetime] = None
+    last_error: Optional[str] = None
+    failures_in_a_row: int = Field(default=0)
+    failure_alerted: bool = Field(default=False)
+    captcha_alert_month: Optional[str] = None  # "2026-11": the "needs you" push was sent this month
+
+
+class BillRecord(SQLModel, table=True):
+    """One fetched bill. Re-fetching the same month updates the row."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    account_id: int = Field(foreign_key="billaccount.id", index=True)
+    bill_month: str = Field(index=True)  # "2026-11"
+    due_date: Optional[str] = None  # ISO date
+    amount_due: float = 0
+    amount_after_due: Optional[float] = None
+    units: Optional[float] = None
+    paid: Optional[bool] = None
+    data: str = "{}"  # the full normalized Bill as JSON
+    fetched_at: datetime = Field(default_factory=datetime.utcnow)
+    new_alerted: bool = Field(default=False)  # "new bill" push sent
+    due_alerted: bool = Field(default=False)  # "due tomorrow" push sent
