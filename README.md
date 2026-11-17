@@ -2,16 +2,42 @@
 
 Personal notification hub: Google sign-in, Web Push (no FCM
 needed — works on iOS 16.4+ home-screen apps and on Android), a webhook
-for other projects to call, and cron-like reminders.
+for other projects to call, cron-like reminders, watchdog heartbeat monitors
+and an optional AI assistant. Light and dark themes.
 
-## 1. Configure
+## Quick start
+
+```bash
+git clone <this repo> && cd notifaybers
+python3 scripts/setup.py
+```
+
+The setup script asks for everything the app needs and says where to find
+each value (including a step-by-step for the Google OAuth client). It then:
+
+- writes `.env` (mode 600; an existing one is backed up and its values are
+  offered as defaults),
+- generates `SECRET_KEY` and the Web Push (VAPID) key pair in `data/`,
+- for **local development**: creates `.venv`, installs dependencies and can
+  start the app on `http://localhost:8000` (with an optional no-Google login
+  shortcut),
+- for a **server**: builds and starts the Docker container and prints the
+  Caddy snippet for your domain.
+
+It is safe to re-run: your secret key and push keys are kept (replacing them
+would sign everyone out and force devices to re-subscribe). Needs Python 3.9+,
+plus Docker for server mode and `openssl` or the `cryptography` package for the
+push keys. The sections below explain what each setting does if you'd rather
+configure by hand.
+
+## 1. Configure by hand
 
 ```bash
 cp .env.example .env
 python3 -c "import secrets; print(secrets.token_hex(32))"   # -> SECRET_KEY
 ```
 
-Fill in `.env`:
+(`scripts/setup.py` does all of this for you.) Fill in `.env`:
 - `SECRET_KEY` — random value from above.
 - `ADMIN_USERNAME` — name of the account seeded on first startup. There is no
   password login; see "Sign in with Google" below.
@@ -55,6 +81,8 @@ machine then signs you in as `ADMIN_USERNAME` automatically. It only applies to
 direct loopback connections; never enable it on the server.
 
 ## 2. Generate VAPID keys (once)
+
+(Done by `scripts/setup.py`.)
 
 ```bash
 mkdir -p data
@@ -145,7 +173,8 @@ account's timezone (Settings).
 
 ## Redeploying
 
-Not automatic: pushing to GitHub does nothing by itself. Copy
+Not automatic: pushing to GitHub does nothing by itself. (First-time setup
+on the server is `python3 scripts/setup.py`; this is for shipping updates.) Copy
 `.deploy.env.example` to `.deploy.env` (git-ignored), fill in your server and
 domain, then from your local machine:
 
