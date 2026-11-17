@@ -323,6 +323,7 @@ function renderEnableModal() {
       toast("Push notifications enabled!");
       const banner = document.getElementById("notif-banner");
       if (banner) banner.classList.add("hidden");
+      if (typeof loadDevices === "function") loadDevices();
     } catch (err) {
       toast(err.message, ICONS.bell);
       btn.disabled = false;
