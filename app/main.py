@@ -22,6 +22,19 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
+@app.get("/healthz")
+def healthz():
+    """Liveness for deploys: the database answers; reports which copy and whether it runs the scheduler."""
+    from sqlmodel import Session, text
+
+    from app.db import engine
+    from app.scheduler import scheduler
+
+    with Session(engine) as session:
+        session.exec(text("SELECT 1"))
+    return {"status": "ok", "slot": settings.deploy_slot, "scheduler": scheduler.running}
+
+
 @app.get("/sw.js")
 def service_worker():
     # Served from the root (not /static/) so its default scope covers the

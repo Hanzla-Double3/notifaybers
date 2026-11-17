@@ -5,6 +5,7 @@ from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlmodel import Session, select
 
+from app.config import settings
 from app.db import engine
 from app.models import Reminder, User, Watchdog
 from app.push import notify_user
@@ -13,6 +14,7 @@ from app.reminders import compute_next_run
 logger = logging.getLogger("notifaybers.scheduler")
 
 scheduler = BackgroundScheduler()
+_lock_handle = None  # keeps the scheduler lock open for the life of the process
 
 
 def check_reminders() -> None:
@@ -101,7 +103,38 @@ def check_watchdogs() -> None:
                     logger.exception("Failed to send alert for watchdog %s", wd.id)
 
 
-def start_scheduler() -> None:
+def _run_scheduler_as_leader(lock_path: str) -> None:
+    """Block until this process holds the scheduler lock, then start the scheduler.
+
+    During a blue-green deploy two app copies share one database for a short while.
+    Only the lock holder runs the jobs, so reminders never fire twice; the new copy
+    takes over as soon as the old one exits and the OS releases the lock.
+    """
+    import fcntl
+    import os
+
+    os.makedirs(os.path.dirname(os.path.abspath(lock_path)), exist_ok=True)
+    global _lock_handle
+    # Stored on the module: closing the file (e.g. when this thread ends and the
+    # handle is garbage-collected) would release the lock.
+    _lock_handle = handle = open(lock_path, "a")
+    try:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        logger.info("Another instance runs the scheduler; waiting to take over")
+        fcntl.flock(handle, fcntl.LOCK_EX)
     scheduler.add_job(check_reminders, "interval", seconds=60, id="check_reminders")
     scheduler.add_job(check_watchdogs, "interval", seconds=30, id="check_watchdogs")
     scheduler.start()
+    logger.info("Scheduler started")
+
+
+def start_scheduler() -> None:
+    import threading
+
+    threading.Thread(
+        target=_run_scheduler_as_leader,
+        args=(settings.scheduler_lock_path,),
+        name="scheduler-leader",
+        daemon=True,
+    ).start()

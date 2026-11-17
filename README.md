@@ -195,6 +195,43 @@ docker compose up -d --build
 
 If the repo is private, give the server a read-only deploy key so it can pull.
 
+### Auto-deploy with blue-green (Podman + Caddy)
+
+`deploy/bluegreen.py` is an alternative that deploys every push to `master` by itself
+with no downtime. It needs Python 3, Podman, git and a running Caddy container, and
+nothing else (standard library only).
+
+How it works: there are two slots, `blue` and `green`, each its own container on its
+own loopback port. A watcher polls the git remote every minute. For a new commit it
+builds the image, starts it in the idle slot, waits for `/healthz`, runs a smoke test,
+then points Caddy at it with a graceful reload and stops the old slot. If anything
+fails before the switch, the live slot is never touched and that commit is not
+retried. The stopped old slot is kept, so `rollback` is instant.
+
+Only one copy runs the reminder scheduler at a time (a lock file in `data/`), so a
+reminder never fires twice while both copies are up; the new copy takes over the
+moment the old one stops.
+
+Setup on the host (once), with everything under `/opt/notifaybers`:
+
+```
+shared/.env           # your .env (SESSION_SECURE_COOKIE=true, PUBLIC_BASE_URL=https://your.domain)
+shared/data/          # the database and VAPID key
+shared/ssh/deploy_key # read-only deploy key if the repo is private
+shared/deploy.env     # DOMAIN, CADDY_CONTAINER, CADDY_SNIPPET, BLUE_PORT, GREEN_PORT, BRANCH
+repo/                 # git clone of this repository
+```
+
+`CADDY_SNIPPET` is a file your Caddyfile pulls in with `import`; the script owns it
+and rewrites it on every switch. Then:
+
+```bash
+python3 /opt/notifaybers/repo/deploy/bluegreen.py deploy   # first deploy
+python3 /opt/notifaybers/repo/deploy/bluegreen.py watch    # run at boot; auto-deploys pushes
+python3 /opt/notifaybers/repo/deploy/bluegreen.py status
+python3 /opt/notifaybers/repo/deploy/bluegreen.py rollback
+```
+
 ## Notes / accepted tradeoffs
 
 - Sign-in is Google only. Every table is scoped by `user_id`, so more people

@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     default_timezone: str = "UTC"
 
     database_url: str = "sqlite:///./data/notifaybers.db"
+    # Held by whichever app copy runs the scheduler (see app/scheduler.py).
+    scheduler_lock_path: str = "./data/scheduler.lock"
+    # Label for this copy ("blue"/"green"), reported by /healthz. Set by the deploy script.
+    deploy_slot: str = ""
 
     vapid_public_key: str = ""
     vapid_private_key_path: str = "./data/vapid_private.pem"
