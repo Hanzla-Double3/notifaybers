@@ -8,7 +8,7 @@ and an optional AI assistant. Light and dark themes.
 ## Quick start
 
 ```bash
-git clone <this repo> && cd notifaybers
+git clone https://github.com/Hanzla-Double3/notifaybers.git && cd notifaybers
 python3 scripts/setup.py
 ```
 
