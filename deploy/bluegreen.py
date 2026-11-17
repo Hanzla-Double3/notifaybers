@@ -445,6 +445,8 @@ def watch() -> int:
             head = remote_head()
             state = read_state()
             if head != state.get("sha") and head != state.get("failed_sha"):
+                # Move the checkout first so the new commit is deployed by its own deploy script.
+                run(["git", "-C", str(REPO), "reset", "--hard", "--quiet", head])
                 run([sys.executable, str(Path(__file__).resolve()), "deploy", "--sha", head], check=False)
         except Exception as exc:  # network blips must not kill the loop
             log(f"poll error: {exc}")
