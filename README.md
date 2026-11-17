@@ -232,6 +232,9 @@ python3 /opt/notifaybers/repo/deploy/bluegreen.py status
 python3 /opt/notifaybers/repo/deploy/bluegreen.py rollback
 ```
 
+Logs: `/var/log/notifaybers-deploy.log` (watcher and deploys). Each app copy's own
+output is `podman logs notifaybers-blue` / `notifaybers-green`.
+
 ## Notes / accepted tradeoffs
 
 - Sign-in is Google only. Every table is scoped by `user_id`, so more people
