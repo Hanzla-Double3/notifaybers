@@ -6,6 +6,7 @@ from authlib.integrations.starlette_client import OAuth
 from sqlmodel import Session, select
 
 from app.config import settings
+from app.db import promote_configured_admin
 from app.models import User
 from app.security import hash_password
 
@@ -62,6 +63,7 @@ def resolve_google_user(session: Session, claims: dict) -> User:
         user.name = claims.get("name") or user.name
         session.add(user)
         session.commit()
+        promote_configured_admin(session, user)
         return user
 
     # Username must be unique and non-null; the email is a natural choice. The
@@ -77,4 +79,5 @@ def resolve_google_user(session: Session, claims: dict) -> User:
     session.add(user)
     session.commit()
     session.refresh(user)
+    promote_configured_admin(session, user)
     return user

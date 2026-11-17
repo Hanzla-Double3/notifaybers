@@ -442,6 +442,33 @@
     <p class="empty-desc">Generate an API key to trigger push notifications from your bash scripts, CI/CD pipelines, or servers.</p>
   </div>
 
+  {% if is_admin %}
+  <section class="section-head">
+    <div class="section-title-wrap">
+      <h2>Admin</h2>
+    </div>
+  </section>
+  <section class="card settings-card">
+    <a href="/admin/users" class="feature-row admin-link">
+      <div class="card-header-icon">
+        <div class="icon-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div class="card-header-text">
+          <span class="card-label">Users</span>
+          <span class="card-hint">Everyone who has signed up, and when they were last active.</span>
+        </div>
+      </div>
+      <svg class="admin-link-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+  </section>
+  {% endif %}
+
   <section class="section-head">
     <div class="section-title-wrap">
       <h2>Account</h2>

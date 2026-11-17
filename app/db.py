@@ -1,5 +1,6 @@
 import secrets
 
+from sqlalchemy import or_
 from sqlmodel import Session, SQLModel, create_engine, select
 
 from app.config import settings
@@ -34,6 +35,12 @@ def _migrate() -> None:
             conn.commit()
         if "bills_enabled" not in user_cols:
             conn.exec_driver_sql("ALTER TABLE user ADD COLUMN bills_enabled BOOLEAN NOT NULL DEFAULT 0")
+            conn.commit()
+        if "is_admin" not in user_cols:
+            conn.exec_driver_sql("ALTER TABLE user ADD COLUMN is_admin BOOLEAN NOT NULL DEFAULT 0")
+            conn.commit()
+        if "last_active_at" not in user_cols:
+            conn.exec_driver_sql("ALTER TABLE user ADD COLUMN last_active_at DATETIME")
             conn.commit()
         if "bills_language" not in user_cols:
             conn.exec_driver_sql("ALTER TABLE user ADD COLUMN bills_language TEXT NOT NULL DEFAULT 'ur_roman'")
@@ -73,6 +80,29 @@ def init_db() -> None:
             )
             session.add(user)
             session.commit()
+        # The configured admin account is always an admin. This only ever promotes:
+        # nobody is demoted behind your back if the env values change later.
+        promote_configured_admin(session)
+
+
+def promote_configured_admin(session: Session, user: User | None = None) -> None:
+    """Make the configured admin account an admin: the seeded ADMIN_USERNAME account and
+    whichever account has the ADMIN_EMAIL address (they are the same account once linked)."""
+    if user is not None:
+        admin_email = settings.admin_email.strip().lower()
+        is_configured = user.username == settings.admin_username or bool(
+            admin_email and (user.email or "").lower() == admin_email
+        )
+        if is_configured and not user.is_admin:
+            user.is_admin = True
+            session.add(user)
+            session.commit()
+        return
+    candidates = [User.username == settings.admin_username]
+    if settings.admin_email.strip():
+        candidates.append(User.email == settings.admin_email.strip().lower())
+    for match in session.exec(select(User).where(or_(*candidates))).all():
+        promote_configured_admin(session, match)
 
 
 def get_session():

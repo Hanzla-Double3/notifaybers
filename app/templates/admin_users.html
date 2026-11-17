@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Notifaybers — Users</title>
+<meta name="theme-color" content="#090a0f">
+<script src="/static/theme.js?v={{ asset_v('theme.js') }}"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.json">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/static/style.css?v={{ asset_v('style.css') }}">
+</head>
+<body class="admin-body">
+<main class="admin-wrap">
+  <a href="/settings" class="admin-back">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    <span>Settings</span>
+  </a>
+
+  <section class="section-head">
+    <div class="section-title-wrap">
+      <h2>Users</h2>
+      <span class="card-hint">{{ total }} signed up · times shown in {{ timezone }}</span>
+    </div>
+  </section>
+
+  <section class="list">
+    {% for u in users %}
+    <div class="list-item admin-user">
+      <div class="admin-user-main">
+        <span class="admin-user-email">{{ u.email }}</span>
+        {% if u.name %}<span class="card-hint">{{ u.name }}</span>{% endif %}
+        <span class="card-hint">Signed up {{ u.signed_up }}</span>
+      </div>
+      <div class="admin-user-side">
+        {% if u.is_admin %}<span class="admin-tag">Admin</span>{% endif %}
+        {% if not u.is_active %}<span class="admin-tag admin-tag-off">Disabled</span>{% endif %}
+        <span class="admin-user-active">{% if u.last_active %}{{ u.last_active }}{% else %}Never{% endif %}</span>
+        <span class="card-hint">Last active</span>
+      </div>
+    </div>
+    {% endfor %}
+  </section>
+
+  {% if pages > 1 %}
+  <nav class="admin-pager" aria-label="Pages">
+    {% if page > 1 %}<a class="btn-ghost btn-sm" href="/admin/users?page={{ page - 1 }}">Previous</a>{% else %}<span class="btn-ghost btn-sm admin-pager-off">Previous</span>{% endif %}
+    <span class="card-hint">Page {{ page }} of {{ pages }}</span>
+    {% if page < pages %}<a class="btn-ghost btn-sm" href="/admin/users?page={{ page + 1 }}">Next</a>{% else %}<span class="btn-ghost btn-sm admin-pager-off">Next</span>{% endif %}
+  </nav>
+  {% endif %}
+</main>
+</body>
+</html>

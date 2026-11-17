@@ -20,7 +20,9 @@ class User(SQLModel, table=True):
     openai_base_url: Optional[str] = "https://api.openai.com/v1"
     openai_model: Optional[str] = "gpt-4o-mini"
     is_active: bool = Field(default=True)
+    is_admin: bool = Field(default=False)
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_active_at: Optional[datetime] = None  # UTC; refreshed at most every few minutes
 
 
 class LoginAttempt(SQLModel, table=True):

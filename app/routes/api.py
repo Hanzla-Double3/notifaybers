@@ -33,6 +33,7 @@ def get_me(request: Request, user: User = Depends(require_user_api)):
         "reminders_enabled": user.reminders_enabled,
         "bills_enabled": user.bills_enabled,
         "bills_language": user.bills_language,
+        "is_admin": user.is_admin,
         "watchdog_min_ping_seconds": settings.watchdog_min_ping_seconds,
         "has_openai_key": bool(user.openai_api_key and user.openai_api_key.strip()),
         "openai_base_url": user.openai_base_url or "https://api.openai.com/v1",

@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from fastapi import Depends, HTTPException, Request
 from sqlmodel import Session, select
 
@@ -12,11 +14,27 @@ def public_base_url(request: Request) -> str:
     return (settings.public_base_url.strip() or str(request.base_url)).rstrip("/")
 
 
+ACTIVE_TOUCH_INTERVAL = timedelta(minutes=5)
+
+
+def touch_last_active(session: Session, user: User) -> None:
+    """Record that the user is using the app. Written at most every few minutes, so
+    polling endpoints do not turn every request into a database write."""
+    now = datetime.utcnow()
+    if user.last_active_at is None or now - user.last_active_at >= ACTIVE_TOUCH_INTERVAL:
+        user.last_active_at = now
+        session.add(user)
+        session.commit()
+
+
 def get_current_user(request: Request, session: Session = Depends(get_session)) -> User | None:
     user_id = request.session.get("user_id")
     if user_id is None:
         return None
-    return session.get(User, user_id)
+    user = session.get(User, user_id)
+    if user is not None:
+        touch_last_active(session, user)
+    return user
 
 
 def require_user_api(user: User | None = Depends(get_current_user)) -> User:

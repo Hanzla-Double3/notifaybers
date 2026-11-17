@@ -2820,3 +2820,77 @@ body.ai-chat-open .tabbar {
 
 .bill-actions { flex-wrap: wrap; margin-top: 16px; }
 .bill-actions button { flex: 1 1 auto; }
+
+/* ==========================================================================
+   Admin: users list
+   ========================================================================== */
+
+.admin-body {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.admin-wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 20px 20px calc(40px + var(--safe-bottom));
+}
+
+.admin-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.admin-back:hover { color: var(--text); }
+.admin-back svg { width: 16px; height: 16px; }
+
+.admin-user {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.admin-user-main,
+.admin-user-side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.admin-user-side { align-items: flex-end; text-align: right; flex-shrink: 0; }
+.admin-user-email {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.admin-user-active { font-size: 13.5px; font-weight: 500; color: var(--text); }
+
+.admin-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--accent-light);
+  color: var(--accent);
+}
+.admin-tag-off { background: var(--danger-light); color: var(--danger); }
+
+.admin-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+.admin-pager-off { opacity: 0.4; pointer-events: none; }
+
+.admin-link { text-decoration: none; color: inherit; }
+.admin-link-chevron { width: 18px; height: 18px; color: var(--text-muted); flex-shrink: 0; }
