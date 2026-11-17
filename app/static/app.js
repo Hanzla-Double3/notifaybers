@@ -253,6 +253,15 @@ async function subscribeForPush() {
 
   const reg = await navigator.serviceWorker.ready;
   let sub = await reg.pushManager.getSubscription();
+  // A subscription made under a different VAPID key can never receive our pushes
+  // (e.g. the server's keys changed); drop it and subscribe again with the current key.
+  if (sub && sub.options && sub.options.applicationServerKey) {
+    const have = arrayBufferToBase64Url(sub.options.applicationServerKey);
+    if (have !== publicKey.replace(/=+$/, "")) {
+      await sub.unsubscribe();
+      sub = null;
+    }
+  }
   if (!sub) {
     sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,
