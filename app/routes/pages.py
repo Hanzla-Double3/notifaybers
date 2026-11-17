@@ -6,6 +6,7 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy import case, func
 from sqlmodel import Session, select
 
+from app.config import settings
 from app.db import get_session
 from app.deps import public_base_url, touch_last_active
 from app.models import User
@@ -37,8 +38,26 @@ def _render(request: Request, template: str, session: Session):
     )
 
 
+GITHUB_URL = "https://github.com/Hanzla-Double3/notifaybers"
+
+
 @router.get("/")
 def dashboard(request: Request, session: Session = Depends(get_session)):
+    user_id = request.session.get("user_id")
+    user = session.get(User, user_id) if user_id else None
+    if user is None or not user.is_active:
+        # Visitors who are not signed in get the public home page.
+        request.session.clear()
+        return templates.TemplateResponse(
+            request,
+            "home.html",
+            {
+                "github_url": GITHUB_URL,
+                "sign_in_url": "/auth/google" if settings.google_enabled else "/login",
+                "open_signup": settings.open_signup,
+                "base_url": public_base_url(request),
+            },
+        )
     return _render(request, "dashboard.html", session)
 
 

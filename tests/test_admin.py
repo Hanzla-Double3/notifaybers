@@ -149,3 +149,32 @@ def test_last_active_is_recorded_but_not_on_every_request(client, users):
     client.get("/api/me")
     with Session(engine) as session:
         assert datetime.utcnow() - session.get(User, users["regular_id"]).last_active_at < timedelta(minutes=1)
+
+
+# ---- public home page ------------------------------------------------------------------------
+
+
+def test_visitors_see_the_home_page_and_signed_in_users_see_the_app(client, users):
+    home = client.get("/")
+    assert home.status_code == 200
+    assert "Your own notification hub" in home.text
+    assert "github.com/Hanzla-Double3/notifaybers" in home.text
+    assert 'id="view-settings"' not in home.text  # not the app shell
+
+    login_as(client, users["regular_id"])
+    app_page = client.get("/")
+    assert app_page.status_code == 200
+    assert "Your own notification hub" not in app_page.text
+    assert 'id="view-settings"' in app_page.text
+
+
+def test_home_page_for_a_stale_session_is_the_public_page(client, users):
+    login_as(client, 99999)  # a user id that does not exist
+    response = client.get("/")
+    assert response.status_code == 200 and "Your own notification hub" in response.text
+
+
+def test_other_pages_still_send_visitors_to_login(client, users):
+    for path in ("/settings", "/reminders", "/bills"):
+        response = client.get(path)
+        assert response.status_code == 303 and response.headers["location"] == "/login", path
