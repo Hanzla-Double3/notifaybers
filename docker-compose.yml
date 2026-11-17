@@ -1,0 +1,14 @@
+services:
+  notifaybers:
+    build: .
+    container_name: notifaybers
+    restart: unless-stopped
+    # Bound to localhost only — Caddy on the host proxies to this port.
+    # If Caddy itself runs in Docker, remove this ports mapping and put
+    # both services on the same Docker network instead (see README).
+    ports:
+      - "127.0.0.1:8010:8000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env

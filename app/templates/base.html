@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Notifaybers</title>
+<meta name="theme-color" content="#090a0f">
+<script src="/static/theme.js?v={{ asset_v('theme.js') }}"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.json">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/static/icons/favicon-16.png">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Notifaybers">
+<link rel="stylesheet" href="/static/style.css?v={{ asset_v('style.css') }}">
+</head>
+<body data-page="{% block page_id %}{% endblock %}" data-watchdogs="{{ '1' if watchdogs_enabled else '0' }}" data-base-url="{{ base_url }}">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/" class="brand-link">
+      <div class="brand-logo-wrap">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+        </svg>
+        <span class="brand-pulse"></span>
+      </div>
+      <div class="brand-meta">
+        <span class="brand-text">Notifaybers</span>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <nav class="desktop-nav">
+      <div class="desktop-nav-indicator" id="desktop-nav-indicator"></div>
+      <a href="/" class="nav-item" data-path="/">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+        </svg>
+        <span>Inbox</span>
+      </a>
+      <a href="/reminders" class="nav-item" data-path="/reminders">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span>Reminders</span>
+      </a>
+      <a href="/watchdogs" class="nav-item{% if not watchdogs_enabled %} hidden{% endif %}" data-path="/watchdogs" data-requires="watchdogs">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+        <span>Watchdogs</span>
+      </a>
+      <a href="/settings" class="nav-item" data-path="/settings">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" x2="20" y1="21" y2="21"/>
+          <line x1="4" x2="20" y1="14" y2="14"/>
+          <line x1="4" x2="20" y1="7" y2="7"/>
+          <circle cx="9" cy="7" r="2"/>
+          <circle cx="17" cy="14" r="2"/>
+          <circle cx="11" cy="21" r="2"/>
+        </svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="topbar-actions">
+      <button id="ai-chat-btn" class="btn-ghost btn-sm btn-ai-trigger" type="button" title="Ask AI Assistant">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+        </svg>
+        <span class="ai-label">Ask AI</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Pull-to-Refresh Indicator for PWA / iOS Home Screen (Reddit & Facebook Style) -->
+<div class="pull-refresh-indicator" id="pull-refresh-indicator" aria-hidden="true">
+  <div class="pull-refresh-disc">
+    <svg class="pull-refresh-circle-svg" viewBox="0 0 36 36">
+      <circle class="pull-track" cx="18" cy="18" r="13" />
+      <circle class="pull-meter" id="pull-meter" cx="18" cy="18" r="13" />
+    </svg>
+    <div class="pull-refresh-icon-container">
+      <svg class="pull-arrow" id="pull-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14M19 12l-7 7-7-7"/>
+      </svg>
+      <svg class="pull-check" id="pull-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<main class="content">
+{% block content %}{% endblock %}
+</main>
+
+<!-- Mobile Floating Dock Tabbar -->
+<nav class="tabbar">
+  <div class="tabbar-container">
+    <div class="tabbar-indicator" id="tabbar-indicator"></div>
+    <a href="/" class="tab" data-path="/">
+      <div class="tab-icon-wrap">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+        </svg>
+      </div>
+      <span>Inbox</span>
+    </a>
+    <a href="/reminders" class="tab" data-path="/reminders">
+      <div class="tab-icon-wrap">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <span>Reminders</span>
+    </a>
+    <a href="/watchdogs" class="tab{% if not watchdogs_enabled %} hidden{% endif %}" data-path="/watchdogs" data-requires="watchdogs">
+      <div class="tab-icon-wrap">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+      </div>
+      <span>Watchdogs</span>
+    </a>
+    <a href="/settings" class="tab" data-path="/settings">
+      <div class="tab-icon-wrap">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" x2="20" y1="21" y2="21"/>
+          <line x1="4" x2="20" y1="14" y2="14"/>
+          <line x1="4" x2="20" y1="7" y2="7"/>
+          <circle cx="9" cy="7" r="2"/>
+          <circle cx="17" cy="14" r="2"/>
+          <circle cx="11" cy="21" r="2"/>
+        </svg>
+      </div>
+      <span>Settings</span>
+    </a>
+  </div>
+</nav>
+
+<!-- AI Assistant Slide-over Drawer. Lives outside <main class="content"> on
+     purpose -- .content has `will-change: transform`, which creates a new
+     containing block for position:fixed descendants, so a drawer nested
+     inside it sizes itself to .content's scrollable height instead of the
+     real viewport. -->
+<div id="ai-chat-drawer" class="ai-drawer hidden" aria-hidden="true">
+  <div class="ai-drawer-backdrop" onclick="closeAiChatModal()"></div>
+  <div class="ai-drawer-panel">
+    <div class="ai-drawer-header">
+      <div class="ai-drawer-title">
+        <div class="ai-title-sparkle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+          </svg>
+        </div>
+        <span>AI Reminder Assistant</span>
+      </div>
+      <button class="ai-drawer-close" onclick="closeAiChatModal()" title="Close Assistant">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="ai-messages" id="ai-messages">
+      <div class="ai-bubble ai-bubble-assistant">
+        <div class="ai-bubble-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+          </svg>
+        </div>
+        <div class="ai-bubble-content">
+          Hello! I'm your personal Notifaybers AI assistant. I can schedule reminders, create watchdog heartbeat monitors, or manage notifications using natural language. Try one of the quick suggestions below or type your request!
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-quick-prompts">
+      <button class="ai-chip" onclick="sendQuickAiPrompt('Remind me tomorrow at 9 AM to review project updates')">
+        "Remind me tomorrow at 9 AM..."
+      </button>
+      <button class="ai-chip" onclick="sendQuickAiPrompt('Remind me every weekday at 10:30 AM to take a stretch break')">
+        "Every weekday at 10:30 AM..."
+      </button>
+      <button class="ai-chip" onclick="sendQuickAiPrompt('Show all my active reminders')">
+        "Show my reminders"
+      </button>
+      <button class="ai-chip{% if not watchdogs_enabled %} hidden{% endif %}" data-requires="watchdogs" onclick="sendQuickAiPrompt('Create a watchdog for database backup expected every 24 hours')">
+        "Watchdog for DB backup (24h)"
+      </button>
+    </div>
+
+    <form class="ai-input-bar" id="ai-chat-form" onsubmit="handleAiFormSubmit(event)">
+      <input type="text" id="ai-chat-input" placeholder="Ask AI to schedule a reminder, create watchdog..." autocomplete="off">
+      <button type="submit" id="ai-send-btn" class="ai-send-btn" title="Send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script src="/static/vendor/marked.min.js" defer></script>
+<script src="/static/vendor/purify.min.js" defer></script>
+<script src="/static/app.js?v={{ asset_v('app.js') }}" defer></script>
+<script>
+  document.querySelectorAll('.tab, .nav-item').forEach(function (el) {
+    if (el.dataset.path === window.location.pathname) {
+      el.classList.add('active');
+    }
+  });
+</script>
+</body>
+</html>
