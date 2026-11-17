@@ -148,6 +148,9 @@ def export_release(sha: str) -> Path:
     archive.stdout.close()
     if archive.wait() != 0 or untar.returncode != 0:
         raise RuntimeError(f"could not export {sha[:12]} from the repository")
+    # The image has no git history; this is what Settings shows as the version.
+    label = run(["git", "-C", str(REPO), "log", "-1", "--format=%h · %cs", sha], capture=True).stdout
+    (dest / "VERSION").write_text(label + "\n")
     return dest
 
 

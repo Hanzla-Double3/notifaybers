@@ -1418,12 +1418,12 @@ async function loadDevices() {
 async function removeDevice(id) {
   if (!confirm("Remove this device? It will immediately stop receiving notifications.")) return;
   try {
-    const items = await api("/api/subscriptions");
-    const target = items.find((d) => d.id === id);
-    await api("/api/subscriptions", {
-      method: "DELETE",
-      body: JSON.stringify({ endpoint: target?.endpoint || "" }),
-    });
+    const res = await api(`/api/subscriptions/${id}`, { method: "DELETE" });
+    // If this browser is the removed device, drop its push subscription too.
+    try {
+      const own = await getExistingSubscription();
+      if (own && res && own.endpoint === res.endpoint) await own.unsubscribe();
+    } catch (e) { }
     toast("Device unsubscribed");
     await loadDevices();
   } catch (err) {

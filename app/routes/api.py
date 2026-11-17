@@ -219,6 +219,27 @@ def delete_subscription(
     return {"status": "deleted"}
 
 
+@router.delete("/subscriptions/{sub_id}")
+def delete_subscription_by_id(
+    sub_id: int,
+    user: User = Depends(require_user_api),
+    session: Session = Depends(get_session),
+):
+    """Remove one of the user's devices by id (what the Settings list knows).
+
+    Returns the endpoint so the browser can drop its own push subscription if it is this device.
+    """
+    sub = session.exec(
+        select(PushSubscription).where(PushSubscription.id == sub_id, PushSubscription.user_id == user.id)
+    ).first()
+    if sub is None:
+        raise HTTPException(status_code=404, detail="Device not found")
+    endpoint = sub.endpoint
+    session.delete(sub)
+    session.commit()
+    return {"status": "deleted", "endpoint": endpoint}
+
+
 @router.post("/test-push")
 def test_push(user: User = Depends(require_user_api), session: Session = Depends(get_session)):
     status = notify_user(

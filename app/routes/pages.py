@@ -6,6 +6,7 @@ from app.db import get_session
 from app.deps import public_base_url
 from app.models import User
 from app.templating import templates
+from app.version import app_version
 
 router = APIRouter()
 
@@ -19,7 +20,7 @@ def _render(request: Request, template: str, session: Session):
     return templates.TemplateResponse(
         request,
         template,
-        {"watchdogs_enabled": user.watchdogs_enabled, "base_url": public_base_url(request)},
+        {"watchdogs_enabled": user.watchdogs_enabled, "base_url": public_base_url(request), "version": app_version()},
     )
 
 

@@ -29,10 +29,11 @@ def healthz():
 
     from app.db import engine
     from app.scheduler import scheduler
+    from app.version import app_version
 
     with Session(engine) as session:
         session.exec(text("SELECT 1"))
-    return {"status": "ok", "slot": settings.deploy_slot, "scheduler": scheduler.running}
+    return {"status": "ok", "slot": settings.deploy_slot, "scheduler": scheduler.running, "version": app_version()}
 
 
 @app.get("/sw.js")
