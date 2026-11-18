@@ -3053,3 +3053,11 @@ body.ai-chat-open .tabbar {
   .home-cta { flex-direction: column; align-items: stretch; }
   .home-cta .btn-google, .home-secondary { justify-content: center; text-align: center; }
 }
+
+/* Bill details: name, reference number (copyable), meter, tariff */
+.bill-detail-row { align-items: center; }
+.bill-detail-row > span:first-child { flex-shrink: 0; }
+.bill-detail-row > span:last-child { text-align: right; overflow-wrap: anywhere; }
+.bill-ref { display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.bill-ref code { font-family: var(--font-mono); font-size: 13px; color: var(--text); user-select: all; }
+.bill-copy { padding: 4px 10px; }

@@ -5,6 +5,27 @@ needed — works on iOS 16.4+ home-screen apps and on Android), a webhook
 for other projects to call, cron-like reminders, watchdog heartbeat monitors
 and an optional AI assistant. Light and dark themes.
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/home.png" alt="The public home page" width="720">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/inbox.png" alt="Inbox: recent activity" width="190">
+  <img src="docs/screenshots/reminders.png" alt="Reminders" width="190">
+  <img src="docs/screenshots/watchdogs.png" alt="Watchdogs" width="190">
+  <img src="docs/screenshots/settings.png" alt="Settings" width="190">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/bills.png" alt="Bills" width="190">
+  <img src="docs/screenshots/bill-detail.png" alt="A bill explained, with the customer name and a copyable reference number" width="190">
+  <img src="docs/screenshots/bill-breakdown.png" alt="Bill breakdown and 12-month history" width="190">
+</p>
+
+*The screenshots use made-up data. The bill is a redacted test fixture.*
+
 ## Quick start
 
 ```bash
@@ -163,9 +184,10 @@ watchdogs keep being monitored even if the feature is switched off again.
 
 Off by default. Turn it on in Settings → Features and a Bills tab appears. Pick your
 company (electricity, gas, water, phone), enter the number printed on your bill, and
-Notifaybers fetches the bill, shows the amount, due date, a 12-month history and a
-plain-language breakdown in English, Roman Urdu or Urdu, and can share the bill as an
-image.
+Notifaybers fetches the bill and shows the amount, due date, the customer name and
+address, the reference number (with a Copy button for pasting into your bank app), a
+12-month history and a plain-language breakdown in English, Roman Urdu or Urdu. It can
+also share the bill as an image.
 
 Each day at 8 am (your timezone) it checks only when a new bill is expected, using
 that company's usual publish day, and sends a push when one arrives. The day before
@@ -175,6 +197,18 @@ Companies are plugins: one file per company in `app/bills/adapters/`. Anyone can
 one; see [docs/ADAPTERS.md](docs/ADAPTERS.md) and [CONTRIBUTING.md](CONTRIBUTING.md). If a company's portal asks for a CAPTCHA,
 the app shows it to you and you type it; it never solves one for you. Bill data is
 fetched from the company's own public portal and is only as reliable as that portal.
+
+## Home page and admin
+
+Visitors who are not signed in see a public home page at `/` (what the app does, a
+Sign in button, a link to the source). Signed-in users get the app at the same address.
+
+The account named by `ADMIN_USERNAME` / `ADMIN_EMAIL` is marked as an admin
+(`is_admin` on the user row; setting those values only ever promotes an account, it never
+demotes one). Admins get **Settings → Admin → Users**: a paginated list of everyone who
+has signed up, with their email and when they were last active. Nobody else sees the
+link, and `/admin/users` sends them back to Settings. "Last active" is updated when
+someone opens or uses the app, at most once every five minutes.
 
 ## Theme
 

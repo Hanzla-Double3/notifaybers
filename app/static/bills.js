@@ -345,6 +345,9 @@ async function openBillDetail(id) {
 
     <div id="bill-explain" class="bill-explain"></div>
 
+    <div class="bill-section-title">Bill details</div>
+    <div class="bill-table">${detailRows(data, bill)}</div>
+
     <div class="bill-section-title">Breakdown</div>
     <div class="bill-table">${breakdownRows(bill)}</div>
 
@@ -384,6 +387,26 @@ async function openBillDetail(id) {
     })
   );
   document.getElementById("bill-share-btn").addEventListener("click", () => shareBillImage(data));
+  document.querySelectorAll(".bill-copy").forEach((btn) =>
+    btn.addEventListener("click", () => copyToClipboard(btn.dataset.copy, btn))
+  );
+}
+
+function detailRows(data, bill) {
+  const reference = bill.consumer_number || data.consumer_number || "";
+  const rows = [];
+  if (bill.name_and_address) rows.push(["Name & address", `<span>${escapeHtml(bill.name_and_address)}</span>`]);
+  if (reference) {
+    rows.push([
+      "Reference no.",
+      `<span class="bill-ref"><code>${escapeHtml(reference)}</code>
+         <button type="button" class="btn-ghost btn-sm bill-copy" data-copy="${escapeHtml(reference)}" aria-label="Copy reference number">${ICONS.copy || ""}<span>Copy</span></button>
+       </span>`,
+    ]);
+  }
+  if (bill.meter_no) rows.push(["Meter no.", `<span>${escapeHtml(bill.meter_no)}</span>`]);
+  if (bill.tariff) rows.push(["Tariff", `<span>${escapeHtml(bill.tariff)}</span>`]);
+  return rows.map(([label, value]) => `<div class="bill-row bill-detail-row"><span>${label}</span>${value}</div>`).join("");
 }
 
 function breakdownRows(bill) {
